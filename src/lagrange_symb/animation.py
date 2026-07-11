@@ -189,7 +189,7 @@ def animate_double_pendulum(
     dpi: int = 90,
     trail_length: int = 180,
 ) -> FuncAnimation:
-    """Render a double-pendulum animation with angle traces."""
+    """Render a double-pendulum motion animation."""
 
     times = np.asarray(times)
     angles1 = np.asarray(angles1)
@@ -205,45 +205,28 @@ def animate_double_pendulum(
     trail_length = max(2, int(trail_length))
 
     total_length = length1 + length2
+    axis_limit = 2.0 if total_length <= 1.85 else 1.15 * total_length
 
     with plt.rc_context(_DARK_LATEX_RC):
-        fig, (ax_motion, ax_angles) = plt.subplots(1, 2, figsize=(11.5, 4.8))
+        fig, ax_motion = plt.subplots(figsize=(5.6, 5.6))
         fig.patch.set_facecolor("#000000")
         fig.suptitle(r"$\mathrm{Double\ pendulum}$", color="#ffffff", fontsize=14)
 
-        ax_motion.set_xlim(-1.15 * total_length, 1.15 * total_length)
-        ax_motion.set_ylim(-1.15 * total_length, 0.3 * total_length)
+        ax_motion.set_xlim(-axis_limit, axis_limit)
+        ax_motion.set_ylim(-axis_limit, axis_limit)
         ax_motion.set_aspect("equal")
-        ax_motion.set_title(r"$\mathrm{Motion}$", fontsize=12)
+        ax_motion.set_xlabel(r"$x$", fontsize=11)
+        ax_motion.set_ylabel(r"$y$", fontsize=11)
         _style_axes(ax_motion)
-
-        # Unwrap so full revolutions show up as climbing traces.
-        plot_angles1 = np.unwrap(angles1)
-        plot_angles2 = np.unwrap(angles2)
-        all_angles = np.concatenate((plot_angles1, plot_angles2))
-        angle_pad = max(0.4, 0.08 * np.ptp(all_angles))
-        ax_angles.set_title(r"$\mathrm{Angle\ traces}$", fontsize=12)
-        ax_angles.set_xlabel(r"$t\ \mathrm{(s)}$", fontsize=11)
-        ax_angles.set_ylabel(r"$\mathrm{angle\ (rad)}$", fontsize=11)
-        ax_angles.set_xlim(times[0], times[-1] if len(times) > 1 else 1.0)
-        ax_angles.set_ylim(all_angles.min() - angle_pad, all_angles.max() + angle_pad)
-        ax_angles.plot(times, plot_angles1, color=_ACCENT["rod1"], alpha=0.4, label=r"$\theta_1$")
-        ax_angles.plot(times, plot_angles2, color=_ACCENT["bob2"], alpha=0.4, label=r"$\theta_2$")
-        _style_axes(ax_angles)
-        legend = ax_angles.legend(loc="upper right", framealpha=0.92, fontsize=10)
-        for text in legend.get_texts():
-            text.set_color("#ffffff")
 
         (upper_rod,) = ax_motion.plot([], [], lw=2.6, color=_ACCENT["rod1"])
         (lower_rod,) = ax_motion.plot([], [], lw=2.6, color=_ACCENT["rod2"])
         bob1 = ax_motion.scatter([], [], s=90, color=_ACCENT["bob1"], zorder=3)
         bob2 = ax_motion.scatter([], [], s=110, color=_ACCENT["bob2"], zorder=4)
         (trail_line,) = ax_motion.plot([], [], lw=1.2, color=_ACCENT["trail"], alpha=0.45)
-        marker1 = ax_angles.scatter([], [], s=50, color=_ACCENT["rod1"], zorder=3)
-        marker2 = ax_angles.scatter([], [], s=50, color=_ACCENT["bob2"], zorder=3)
         speed_text = ax_motion.text(
             0.04,
-            0.94,
+            0.96,
             "",
             transform=ax_motion.transAxes,
             va="top",
@@ -259,8 +242,6 @@ def animate_double_pendulum(
             bob2.set_offsets(np.array([[x2[frame], y2[frame]]]))
             trail_start = max(0, frame + 1 - trail_length)
             trail_line.set_data(x2[trail_start : frame + 1], y2[trail_start : frame + 1])
-            marker1.set_offsets(np.array([[times[frame], plot_angles1[frame]]]))
-            marker2.set_offsets(np.array([[times[frame], plot_angles2[frame]]]))
             speed_text.set_text(
                 "\n".join(
                     [
@@ -270,7 +251,7 @@ def animate_double_pendulum(
                     ]
                 )
             )
-            return upper_rod, lower_rod, bob1, bob2, trail_line, marker1, marker2, speed_text
+            return upper_rod, lower_rod, bob1, bob2, trail_line, speed_text
 
         frame_interval_ms = _playback_interval_ms(times, indices)
         animation = FuncAnimation(
