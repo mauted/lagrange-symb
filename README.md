@@ -2,7 +2,7 @@
 
 An educational mechanics project for deriving Euler-Lagrange equations symbolically and simulating the resulting dynamics with JAX.
 
-![Double pendulum simulation](docs/double_pendulum.gif)
+![Double pendulum simulation](preview.gif)
 
 ## What it does
 
