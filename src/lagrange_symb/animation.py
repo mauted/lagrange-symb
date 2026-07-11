@@ -55,7 +55,33 @@ def _style_axes(ax) -> None:
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _p: rf"${v:g}$"))
 
 
-def _save_animation(animation: FuncAnimation, fig, save_path: str, frame_interval_ms: float) -> None:
+def _frame_indices(n_frames: int, frame_stride: int) -> np.ndarray:
+    """Return sample indices, always including the final frame."""
+
+    stride = max(1, int(frame_stride))
+    indices = np.arange(0, n_frames, stride, dtype=int)
+    if len(indices) == 0 or indices[-1] != n_frames - 1:
+        indices = np.append(indices, n_frames - 1)
+    return indices
+
+
+def _playback_interval_ms(times: np.ndarray, frame_indices: np.ndarray) -> float:
+    """Keep wall-clock duration close to the simulated duration after striding."""
+
+    if len(frame_indices) <= 1:
+        return 40.0
+    sampled_times = times[frame_indices]
+    return 1000.0 * float(np.mean(np.diff(sampled_times)))
+
+
+def _save_animation(
+    animation: FuncAnimation,
+    fig,
+    save_path: str,
+    frame_interval_ms: float,
+    *,
+    dpi: int = 90,
+) -> None:
     destination = Path(save_path)
     destination.parent.mkdir(parents=True, exist_ok=True)
     fps = max(1, int(round(1000.0 / frame_interval_ms)))
@@ -63,7 +89,7 @@ def _save_animation(animation: FuncAnimation, fig, save_path: str, frame_interva
         destination,
         writer="pillow",
         fps=fps,
-        dpi=110,
+        dpi=dpi,
         savefig_kwargs={"facecolor": fig.get_facecolor(), "edgecolor": "none"},
     )
 
@@ -76,6 +102,8 @@ def animate_pendulum(
     length: float = 1.0,
     save_path: str | None = None,
     show: bool = False,
+    frame_stride: int = 4,
+    dpi: int = 90,
 ) -> FuncAnimation:
     """Render a pendulum animation with a phase-space subplot."""
 
@@ -85,6 +113,7 @@ def animate_pendulum(
 
     x = length * np.sin(angles)
     y = -length * np.cos(angles)
+    indices = _frame_indices(len(times), frame_stride)
 
     with plt.rc_context(_DARK_LATEX_RC):
         fig, (ax_motion, ax_phase) = plt.subplots(1, 2, figsize=(10, 4.5))
@@ -125,17 +154,17 @@ def animate_pendulum(
             time_text.set_text(rf"$t = {times[frame]:.2f}\,\mathrm{{s}}$")
             return rod_line, bob, trail_line, phase_point, time_text
 
-        frame_interval_ms = 1000 * float(np.mean(np.diff(times))) if len(times) > 1 else 20.0
+        frame_interval_ms = _playback_interval_ms(times, indices)
         animation = FuncAnimation(
             fig,
             update,
-            frames=len(times),
+            frames=indices,
             interval=frame_interval_ms,
             blit=True,
         )
 
         if save_path:
-            _save_animation(animation, fig, save_path, frame_interval_ms)
+            _save_animation(animation, fig, save_path, frame_interval_ms, dpi=dpi)
 
         if show:
             plt.show()
@@ -156,6 +185,8 @@ def animate_double_pendulum(
     length2: float = 1.0,
     save_path: str | None = None,
     show: bool = False,
+    frame_stride: int = 4,
+    dpi: int = 90,
 ) -> FuncAnimation:
     """Render a double-pendulum animation with angle traces."""
 
@@ -169,6 +200,7 @@ def animate_double_pendulum(
     y1 = -length1 * np.cos(angles1)
     x2 = x1 + length2 * np.sin(angles2)
     y2 = y1 - length2 * np.cos(angles2)
+    indices = _frame_indices(len(times), frame_stride)
 
     total_length = length1 + length2
 
@@ -234,17 +266,17 @@ def animate_double_pendulum(
             )
             return upper_rod, lower_rod, bob1, bob2, trail_line, marker1, marker2, speed_text
 
-        frame_interval_ms = 1000 * float(np.mean(np.diff(times))) if len(times) > 1 else 20.0
+        frame_interval_ms = _playback_interval_ms(times, indices)
         animation = FuncAnimation(
             fig,
             update,
-            frames=len(times),
+            frames=indices,
             interval=frame_interval_ms,
             blit=True,
         )
 
         if save_path:
-            _save_animation(animation, fig, save_path, frame_interval_ms)
+            _save_animation(animation, fig, save_path, frame_interval_ms, dpi=dpi)
 
         if show:
             plt.show()

@@ -1,4 +1,4 @@
-# lagrange-symb
+# Euler-Lagrange Symbolic Solver
 
 An educational mechanics project for deriving Euler-Lagrange equations symbolically and simulating the resulting dynamics with JAX.
 
