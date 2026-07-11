@@ -39,10 +39,10 @@ def double_pendulum_lagrangian(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--theta1-0", type=float, default=1.4, help="Initial first angle in radians.")
-    parser.add_argument("--theta2-0", type=float, default=0.9, help="Initial second angle in radians.")
-    parser.add_argument("--omega1-0", type=float, default=0.0, help="Initial first angular velocity in radians per second.")
-    parser.add_argument("--omega2-0", type=float, default=0.0, help="Initial second angular velocity in radians per second.")
+    parser.add_argument("--theta1-0", type=float, default=2.7, help="Initial first angle in radians.")
+    parser.add_argument("--theta2-0", type=float, default=-2.3, help="Initial second angle in radians.")
+    parser.add_argument("--omega1-0", type=float, default=1.4, help="Initial first angular velocity in radians per second.")
+    parser.add_argument("--omega2-0", type=float, default=3.8, help="Initial second angular velocity in radians per second.")
     parser.add_argument("--length1", type=float, default=1.0, help="First pendulum length in meters.")
     parser.add_argument("--length2", type=float, default=0.85, help="Second pendulum length in meters.")
     parser.add_argument("--mass1", type=float, default=1.0, help="First pendulum mass in kilograms.")
