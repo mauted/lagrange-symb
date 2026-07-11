@@ -1,0 +1,19 @@
+[project]
+name = "lagrange-symb"
+version = "0.1.0"
+description = "Symbolic Lagrangian mechanics experiments with JAX-based simulation and animation."
+readme = "README.md"
+authors = [
+    { name = "MauricioTedeschi", email = "mauricioatedeschi@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "jax>=0.10.2",
+    "matplotlib>=3.11.0",
+    "pillow>=12.3.0",
+    "sympy>=1.14.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.27,<0.10.0"]
+build-backend = "uv_build"
